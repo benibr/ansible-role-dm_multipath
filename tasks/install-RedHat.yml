@@ -1,0 +1,5 @@
+---
+- name: "Install multipath package"
+  yum:
+    name: "{{ multipath_packages }}"
+    state: present

@@ -1,0 +1,25 @@
+---
+- name: "Ensure /etc/multipath exists"
+  file:
+    state: directory
+    path: "/etc/multipath"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: "Ensure /etc/multipath/conf.d exists"
+  file:
+    state: directory
+    path: "/etc/multipath/conf.d"
+    owner: root
+    group: root
+    mode: 0755
+
+- name: "Manage multipath.conf configuration"
+  template:
+    src: "{{ multipath_conf_template }}"
+    dest: "/etc/multipath.conf"
+    owner: root
+    group: root
+    mode: 0600
+  notify: "Reload multipathd"

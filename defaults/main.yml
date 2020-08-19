@@ -1,2 +1,5 @@
 ---
-# defaults file for ansible-dm-multipath
+multipath_defaults_find_multipaths: 'yes'
+multipath_defaults_user_friendly_names: 'yes'
+
+multipath_conf_template: 'multipath.conf.j2'
