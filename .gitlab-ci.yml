@@ -1,0 +1,13 @@
+default:
+  image: registry.git.ku.dk/ku-it/ansible/execution-environments:default-latest
+  before_script:
+    - ansible --version
+    - printf '[defaults]\nroles_path=../' >ansible.cfg
+
+linting:
+  script:
+    - ansible-lint --profile production
+
+test:
+  script:
+    - ansible-playbook -i tests/inventory tests/test.yml
