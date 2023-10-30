@@ -2,4 +2,4 @@
 multipath_defaults_find_multipaths: 'yes'
 multipath_defaults_user_friendly_names: 'yes'
 
-multipath_conf_template: 'multipath.conf.j2'
+multipath_conf_template: 'templates/multipath.conf.j2'
