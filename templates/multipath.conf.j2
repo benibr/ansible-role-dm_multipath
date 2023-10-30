@@ -2,18 +2,18 @@
 # {{ ansible_managed }}
 
 defaults {
-  find_multipaths {{ multipath_defaults_find_multipaths }}
-  user_friendly_names {{ multipath_defaults_user_friendly_names }}
-  {% if multipath_defaults is defined %}
-  {% for key, value in multipath_defaults.items() %}
+  find_multipaths {{ dm_multipath_defaults_find_multipaths }}
+  user_friendly_names {{ dm_multipath_defaults_user_friendly_names }}
+  {% if dm_multipath_defaults is defined %}
+  {% for key, value in dm_multipath_defaults.items() %}
   {{ key }} {{ value }}
   {% endfor %}
   {% endif %}
 }
-{% if multipath_blacklist_devices is defined %}
+{% if dm_multipath_blacklist_devices is defined %}
 
 blacklist {
-  {% for device in multipath_blacklist_devices %}
+  {% for device in dm_multipath_blacklist_devices %}
   device {
     {% for key, value in device.items() %}
     {{ key }} {{ value }}
@@ -22,10 +22,10 @@ blacklist {
   {% endfor %}
 }
 {% endif %}
-{% if multipath_blacklist_exceptions is defined %}
+{% if dm_multipath_blacklist_exceptions is defined %}
 
 blacklist_exceptions {
-  {% for device in multipath_blacklist_exceptions %}
+  {% for device in dm_multipath_blacklist_exceptions %}
   device {
     {% for key, value in device.items() %}
     {{ key }} {{ value }}
@@ -34,10 +34,10 @@ blacklist_exceptions {
   {% endfor %}
 }
 {% endif %}
-{% if multipath_devices is defined %}
+{% if dm_multipath_devices is defined %}
 
 devices {
-  {% for device in multipath_devices %}
+  {% for device in dm_multipath_devices %}
   device {
     {% for key, value in device.items() %}
     {{ key }} {{ value }}
@@ -46,10 +46,10 @@ devices {
   {% endfor %}
 }
 {% endif %}
-{% if multipath_multipaths is defined %}
+{% if dm_multipath_multipaths is defined %}
 
 multipaths {
-  {% for multipath in multipath_multipaths %}
+  {% for multipath in dm_multipath_multipaths %}
   multipath {
     {% for key, value in multipath.items() %}
     {{ key }} {{ value }}
