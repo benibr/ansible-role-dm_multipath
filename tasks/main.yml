@@ -10,6 +10,6 @@
 
 - name: "Enable and start service"
   systemd:
-    name: '{{ multipath_service }}'
+    name: '{{ dm_multipath_service }}'
     state: 'started'
     enabled: yes
