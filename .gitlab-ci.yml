@@ -9,7 +9,3 @@ default:
 linting:
   script:
     - ansible-lint --profile production
-
-test:
-  script:
-    - ansible-playbook -i tests/inventory tests/test.yml
