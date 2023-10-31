@@ -1,6 +1,8 @@
 ---
 galaxy_info:
   author: Benedikt Braunger
+  namespace: kuit
+  role_name: dm_multipath
   description: Configuring the dm-multipath driver
   company: KU
 
