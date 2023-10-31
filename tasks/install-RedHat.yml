@@ -1,5 +1,5 @@
 ---
 - name: Install multipath package
-  yum:
+  ansible.builtin.yum:
     name: "{{ dm_multipath_packages }}"
     state: present

@@ -1,18 +1,18 @@
 ---
-#- name: "Reload multipathd"
-#  debug: msg="Rescan SCSI bus first"
-#  changed_when: true
-#  notify:
-#    - "Rescan scsi bus"
-#    - "Reload multipathd"
+# - name: "Reload multipathd"
+#   debug: msg="Rescan SCSI bus first"
+#   changed_when: true
+#   notify:
+#     - "Rescan scsi bus"
+#     - "Reload multipathd"
 #
-#- name: "Rescan scsi bus"
-#  command: "rescan-scsi-bus.sh"
-#  register: result
-#  changed_when: "result.rc != 0"
-#  check_mode: no
-#
+# - name: "Rescan scsi bus"
+#   command: "rescan-scsi-bus.sh"
+#   register: result
+#   changed_when: "result.rc != 0"
+#   check_mode: no
+
 - name: Reload multipathd
-  service:
+  ansible.builtin.service:
     name: "{{ multipath_service }}"
     state: reloaded

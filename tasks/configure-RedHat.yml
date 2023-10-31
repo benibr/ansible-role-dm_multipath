@@ -1,6 +1,6 @@
 ---
 - name: Ensure /etc/multipath exists
-  file:
+  ansible.builtin.file:
     state: directory
     path: /etc/multipath
     owner: root
@@ -8,7 +8,7 @@
     mode: "0755"
 
 - name: Ensure /etc/multipath/conf.d exists
-  file:
+  ansible.builtin.file:
     state: directory
     path: /etc/multipath/conf.d
     owner: root
@@ -16,7 +16,7 @@
     mode: "0755"
 
 - name: Manage multipath.conf configuration
-  template:
+  ansible.builtin.template:
     src: "{{ dm_multipath_conf_template }}"
     dest: /etc/multipath.conf
     owner: root
