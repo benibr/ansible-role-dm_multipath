@@ -1,14 +1,10 @@
 default:
   image: registry.git.ku.dk/kuit-public/docker-tower-cli:latest
   before_script:
-    - pwd
-    - ls
-    - find .
     - ansible --version
     # remove world write permissions to allow usage of ansible.cfg
     - chmod 750 ./
     - printf '[defaults]\nroles_path=../\n' > ansible.cfg
-    - cat ansible.cfg
 
 linting:
   script:
