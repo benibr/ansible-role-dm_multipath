@@ -12,7 +12,7 @@
 #  changed_when: "result.rc != 0"
 #  check_mode: no
 #
-- name: "Reload multipathd"
+- name: Reload multipathd
   service:
     name: "{{ multipath_service }}"
-    state: "reloaded"
+    state: reloaded
