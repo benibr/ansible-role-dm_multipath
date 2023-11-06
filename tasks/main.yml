@@ -1,12 +1,34 @@
 ---
 - name: Include OS-specific variables
-  ansible.builtin.include_vars: "{{ ansible_os_family }}.yml"
+  ansible.builtin.include_vars: "{{ ansible_facts['os_family'] }}.yml"
+
 - name: Install dm-multipath for {{ ansible_os_family }}
-  ansible.builtin.include_tasks: install-{{ ansible_os_family }}.yml
+  ansible.builtin.include_tasks: install-{{ ansible_facts['os_family'] }}.yml
+
 - name: Configure dm-multipath for {{ ansible_os_family }}
-  ansible.builtin.include_tasks: configure-{{ ansible_os_family }}.yml
+  ansible.builtin.include_tasks: configure-{{ ansible_facts['os_family'] }}.yml
+
+- name: Create SAS controller specific bindings
+  when: dm_multpath_sas_controllers is defined
+  block:
+    - name: gather SAS controller based bindings
+      sas_multipath_bindings:
+        primary: dm_multpath_sas_controllers["primary"]
+        secondary: dm_multpath_sas_controllers["secondary"]
+  always:
+    - name: print SAS controller specific bindings
+      debug:
+        var: dm_multipath_bindings
+
+- name: Generate device name bindings
+  template:
+    src: templates/bindings.j2
+    dest: /etc/multipath/bindings
+    mode: "0755"
+  when: dm_multipath_bindings
+
 - name: Enable and start service
   ansible.builtin.systemd:
     name: "{{ dm_multipath_service }}"
-    state: started
+    state: reloaded
     enabled: true

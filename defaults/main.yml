@@ -3,3 +3,6 @@ dm_multipath_defaults_find_multipaths: "yes"
 dm_multipath_defaults_user_friendly_names: "yes"
 
 dm_multipath_conf_template: templates/multipath.conf.j2
+dm_multipath_bindings: []
+
+#dm_multpath_sas_controllers:
