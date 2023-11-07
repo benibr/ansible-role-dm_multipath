@@ -3,8 +3,8 @@
   block:
     - name: gather SAS controller based bindings
       sas_multipath_bindings:
-        primary: "{{ dm_multipath_sas_controllers['primary'] | default(omit) }}"
-        secondary: "{{ dm_multipath_sas_controllers['secondary'] | default(omit) }}"
+        primary: "{{ dm_multipath_sas_jbods['primary'] | default(omit) }}"
+        secondary: "{{ dm_multipath_sas_jbods['secondary'] | default(omit) }}"
   always:
     - name: print generated SAS controller structure
       debug:

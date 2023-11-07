@@ -6,5 +6,3 @@ dm_multipath_daemon_readonly_bindings: true
 
 dm_multipath_conf_template: templates/multipath.conf.j2
 dm_multipath_bindings: []
-
-#dm_multpath_sas_controllers:
