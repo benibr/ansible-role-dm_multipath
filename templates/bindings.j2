@@ -1,5 +1,5 @@
 # {{ ansible_managed }}
 
-{% for item in dm_multipath_bindings }}
+{% for item in dm_multipath_bindings %}
 {{ item.friendly_name }} {{ item.wwid }}
 {% endfor %}
