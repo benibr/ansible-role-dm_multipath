@@ -96,7 +96,7 @@ class SAS_JBODS(object):
                 for jbod in glob.glob(os.path.join(port, 'expander-*/port-*0/end_device*/target*/*:*/'), recursive=True):
                     try:
                         with open(os.path.join(jbod, "wwid"), "r") as f:
-                            wwid = f.readline().rstrip()
+                            wwid = f.readline().rstrip().replace("naa.", "3")
                             self.ctrls[ctrl][port] = { "jbod": wwid }
                             self.jbods.setdefault(wwid, {"ports": []})
                             self.jbods[wwid]["ports"] += [jbod]
@@ -116,7 +116,7 @@ class SAS_JBODS(object):
             for disk_path in glob.glob(disk_glob):
                 try:
                     with open(os.path.join(disk_path, "wwid"), "r") as f:
-                        wwid = f.readline().rstrip()
+                        wwid = f.readline().rstrip().replace("naa.", "3")
                         self.jbods[jbod].setdefault("disks", [])
                         self.jbods[jbod]["disks"].append({'wwid': wwid,
                                                          'path': disk_path

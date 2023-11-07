@@ -14,5 +14,5 @@
 
 - name: Reload multipathd
   ansible.builtin.service:
-    name: "{{ multipath_service }}"
+    name: "{{ dm_multipath_service }}"
     state: reloaded

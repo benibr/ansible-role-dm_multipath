@@ -23,3 +23,8 @@
     group: root
     mode: "0600"
   notify: Reload multipathd
+
+    #- name: Create systemd override config for multipath daemon
+    #  template:
+    #    src: tempaltes/multipath.service.override.j2
+    #    dest: /etc/
