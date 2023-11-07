@@ -9,16 +9,19 @@
   ansible.builtin.include_tasks: configure-{{ ansible_facts['os_family'] }}.yml
 
 - name: Create SAS controller specific bindings
-  when: dm_multpath_sas_controllers is defined
+  when: dm_multipath_sas_controllers is defined
   block:
     - name: gather SAS controller based bindings
       sas_multipath_bindings:
-        primary: dm_multpath_sas_controllers["primary"]
-        secondary: dm_multpath_sas_controllers["secondary"]
+        primary: "{{ dm_multipath_sas_controllers['primary'] }}"
+        secondary: "{{ dm_multipath_sas_controllers['secondary'] }}"
   always:
     - name: print SAS controller specific bindings
       debug:
-        var: dm_multipath_bindings
+        var: ansible_facts['sas_ctrls']
+    - name: print SAS controller specific bindings
+      debug:
+        var: ansible_facts['sas_jbods']
 
 - name: Generate device name bindings
   template:

@@ -10,7 +10,8 @@ DOCUMENTATION = r'''
 module: sas_multipath_facts
 short_description: Return list of SAS disks sorted by controllers.
 description:
-     - Returns list of SAS disks sorted in two groups by controllers (primary, secondary). The module also returns a variable to be used as user_friendly_name in dm-multipath.
+     - Returns list of SAS disks sorted in two groups by controllers (primary, secondary).
+     - The module also returns a variable to be used as user_friendly_name in dm-multipath.
 version_added: "2.15"
 requirements: ["Device Mapper Multipath on Linux kernel with sysfs and exactly two SAS controllers"]
 attributes:
@@ -73,59 +74,101 @@ class SAS_JBODS(object):
 
     def __init__(self, module):
         self.module = module
+        self.ctrls = {}
+        self.jbods = {}
+        self.ctrl_glob = glob.glob("/sys/devices/*/*/*/", recursive=True)
 
     def gather_controllers(self):
-        controllers = {}
         ctrl_class = "0x010700"
-        for path in glob.glob("/sys/devices/*/*/*/", recursive=True):
+        for path in self.ctrl_glob:
             try:
                 with open(os.path.join(path, "class"), "r") as f:
                     device_class = f.readline().rstrip()
                     if device_class == ctrl_class:
-                        ctrls[path] = {}
+                        self.ctrls[path] = {}
                     f.close()
             except FileNotFoundError:
                 pass
-        return controllers
 
     def gather_jbods(self):
-        jbods = {}
-        for ctrl in ctrls:
-            for port in ctrls[ctrl]:
+        for ctrl in self.ctrls:
+            for port in self.ctrls[ctrl]:
                 for jbod in glob.glob(os.path.join(port, 'expander-*/port-*0/end_device*/target*/*:*/'), recursive=True):
                     try:
                         with open(os.path.join(jbod, "wwid"), "r") as f:
                             wwid = f.readline().rstrip()
-                            ctrls[ctrl][port] = { "JBOD": wwid }
-                            jbods.setdefault(wwid, {"ports": []})
-                            jbods[wwid]["ports"] += [jbod]
+                            self.ctrls[ctrl][port] = { "JBOD": wwid }
+                            self.jbods.setdefault(wwid, {"ports": []})
+                            self.jbods[wwid]["ports"] += [jbod]
                             f.close()
                     except FileNotFoundError:
                         pass
-        return jbods
 
     def add_controller_ports(self):
-        for ctrl in ctrls:
+        for ctrl in self.ctrls:
             for port in glob.glob(os.path.join(ctrl, 'host*/port-*'), recursive=True):
-                ctrls[ctrl][port] = {}
+                self.ctrls[ctrl][port] = {}
+
+    def gather_disks_by_jbods(self):
+        for jbod in self.jbods:
+            disk_basepath = os.path.normpath(self.jbods[jbod]["ports"][0]).rsplit(os.sep, maxsplit=4)[0]
+            disk_glob = os.path.join(disk_basepath, "port-*/expander*/port-*/end_device-*/target*/*:*/")
+            for disk in glob.glob(disk_glob):
+                try:
+                    with open(os.path.join(disk, "wwid"), "r") as f:
+                        wwid = f.readline().rstrip()
+                        self.jbods[jbod].setdefault("disks", {})
+                        self.jbods[jbod]["disks"][disk] = wwid
+                        f.close()
+                except FileNotFoundError:
+                    pass
+
+    def assign_jbod_role(self, primary="xxx.0000000000000000", secondary="xxx.0000000000000000"):
+        # check if JBOD present
+        self.primary = primary
+        self.secondary = secondary
+        for jbod in self.jbods:
+            if jbod == self.primary:
+                self.jbods[jbod]["role"] = "primary"
+            elif jbod == self.secondary:
+                self.jbods[jbod]["role"] = "secondary"
+            else:
+                self.jbods[jbod]["role"] = "unknown"
 
 
 def main():
-    module = AnsibleModule(argument_spec=dict(), supports_check_mode=True)
-    controllers = {}
-    jbods_with_disks = {}
-
-    module_args = dict(
-            primary=dict(type='string', required=False, default=False),
-            secondary=dict(type='string', required=False, default=False)
+    argument_spec = dict(
+        primary=dict(type='str'),
+        secondary=dict(type='str')
     )
 
-    controllers = gather_controllers()
+    module = AnsibleModule(
+            argument_spec=argument_spec,
+            supports_check_mode=True,
+            required_together=[
+                ['primary', 'secondary'],
+            ]
+    )
 
-    if len(controllers) == 0:
-        results = dict(skipped=True, msg="Failed to find any SAS controllers. This can be due to privileges or some other configuration issue.")
+    sas_jbods = SAS_JBODS(module)
+    sas_jbods.gather_controllers()
+    sas_jbods.add_controller_ports()
+    sas_jbods.gather_jbods()
+    if module.params['primary'] and module.params['secondary']:
+        sas_jbods.assign_jbod_role(primary = module.params['primary'],
+                                   secondary = module.params['secondary']
+                                  )
     else:
-        results = dict(ansible_facts=dict(sas_jbods=jbods_with_disks))
+        sas_jbods.assign_jbod_role()
+    sas_jbods.gather_disks_by_jbods()
+
+    if len(sas_jbods.ctrls) == 0:
+        results = dict(skipped=True,
+                       msg="Failed to find any SAS controllers. \
+                            This can be due to privileges or some other configuration issue."
+                        )
+    else:
+        results = dict(ansible_facts=dict(sas_jbods=sas_jbods.jbods, sas_ctrls=sas_jbods.ctrls))
     module.exit_json(**results)
 
 
