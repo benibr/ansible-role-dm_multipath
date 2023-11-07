@@ -97,7 +97,7 @@ class SAS_JBODS(object):
                     try:
                         with open(os.path.join(jbod, "wwid"), "r") as f:
                             wwid = f.readline().rstrip()
-                            self.ctrls[ctrl][port] = { "JBOD": wwid }
+                            self.ctrls[ctrl][port] = { "jbod": wwid }
                             self.jbods.setdefault(wwid, {"ports": []})
                             self.jbods[wwid]["ports"] += [jbod]
                             f.close()
@@ -113,12 +113,14 @@ class SAS_JBODS(object):
         for jbod in self.jbods:
             disk_basepath = os.path.normpath(self.jbods[jbod]["ports"][0]).rsplit(os.sep, maxsplit=4)[0]
             disk_glob = os.path.join(disk_basepath, "port-*/expander*/port-*/end_device-*/target*/*:*/")
-            for disk in glob.glob(disk_glob):
+            for disk_path in glob.glob(disk_glob):
                 try:
-                    with open(os.path.join(disk, "wwid"), "r") as f:
+                    with open(os.path.join(disk_path, "wwid"), "r") as f:
                         wwid = f.readline().rstrip()
-                        self.jbods[jbod].setdefault("disks", {})
-                        self.jbods[jbod]["disks"][disk] = wwid
+                        self.jbods[jbod].setdefault("disks", [])
+                        self.jbods[jbod]["disks"].append({'wwid': wwid,
+                                                         'path': disk_path
+                                                          })
                         f.close()
                 except FileNotFoundError:
                     pass
