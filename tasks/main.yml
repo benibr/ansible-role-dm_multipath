@@ -8,27 +8,8 @@
 - name: Configure dm-multipath for {{ ansible_os_family }}
   ansible.builtin.include_tasks: configure-{{ ansible_facts['os_family'] }}.yml
 
-- name: Create SAS controller specific bindings
-  when: dm_multipath_sas_controllers is defined
-  block:
-    - name: gather SAS controller based bindings
-      sas_multipath_bindings:
-        primary: "{{ dm_multipath_sas_controllers['primary'] }}"
-        secondary: "{{ dm_multipath_sas_controllers['secondary'] }}"
-  always:
-    - name: print SAS controller specific bindings
-      debug:
-        var: ansible_facts['sas_ctrls']
-    - name: print SAS controller specific bindings
-      debug:
-        var: ansible_facts['sas_jbods']
-
-- name: Generate device name bindings
-  template:
-    src: templates/bindings.j2
-    dest: /etc/multipath/bindings
-    mode: "0755"
-  when: dm_multipath_bindings
+- name: Configure friendly user bindings
+  ansible.builtin.include_tasks: bindings.yml
 
 - name: Enable and start service
   ansible.builtin.systemd:
