@@ -5,4 +5,3 @@ dm_multipath_defaults_user_friendly_names: "yes"
 dm_multipath_daemon_readonly_bindings: false
 
 dm_multipath_conf_template: templates/multipath.conf.j2
-dm_multipath_bindings: []

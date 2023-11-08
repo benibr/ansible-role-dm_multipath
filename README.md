@@ -28,6 +28,7 @@ instead creates multipath devices named like: `/dev/mapper/primary-<WWID>`.
           secondary: "3500c0ff06711d93c"
         dm_multipath_daemon_readonly_bindings: true
         dm_multipath_defaults_find_multipaths: "no"
+        dm_multipath_defaults_user_friendly_names: "no"
       roles:
          - dm_multipath
 ```
