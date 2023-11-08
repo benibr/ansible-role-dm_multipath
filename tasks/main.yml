@@ -1,13 +1,18 @@
 ---
-- name: "Include OS-specific variables"
-  include_vars: "{{ ansible_os_family }}.yml"
+- name: Include OS-specific variables
+  ansible.builtin.include_vars: "{{ ansible_facts['os_family'] }}.yml"
 
-- include_tasks: "install-{{ ansible_os_family }}.yml"
+- name: Install dm-multipath for {{ ansible_os_family }}
+  ansible.builtin.include_tasks: install-{{ ansible_facts['os_family'] }}.yml
 
-- include_tasks: "configure-{{ ansible_os_family }}.yml"
+- name: Configure dm-multipath for {{ ansible_os_family }}
+  ansible.builtin.include_tasks: configure-{{ ansible_facts['os_family'] }}.yml
 
-- name: "Enable and start service"
-  service:
-    name: '{{ multipath_service }}'
-    state: 'started'
-    enabled: yes
+- name: Configure friendly user bindings
+  ansible.builtin.include_tasks: bindings.yml
+
+- name: Enable and start service
+  ansible.builtin.systemd:
+    name: "{{ dm_multipath_service }}"
+    state: reloaded
+    enabled: true

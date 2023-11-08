@@ -1,5 +1,6 @@
 ---
-- hosts: localhost
+- name: Test role with default values
+  hosts: localhost
   remote_user: root
   roles:
-    - ansible-dm-multipath
+    - dm_multipath

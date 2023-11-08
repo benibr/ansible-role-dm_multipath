@@ -1,0 +1,17 @@
+---
+# Linting profile that must at least pass
+profile: min
+
+loop_var_prefix: "{role}_"
+
+# Offline mode disables installation of requirements.yml and schema refreshing
+offline: true
+
+# directly change all automatically fixable errors
+write_list:
+  - all
+
+# warn but do not fail on these rules. For a list of all rules
+# see https://ansible.readthedocs.io/projects/lint/rules/
+warn_list:
+  - role-name
