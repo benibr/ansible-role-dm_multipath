@@ -24,7 +24,15 @@
     mode: "0600"
   notify: Reload multipathd
 
-    #- name: Create systemd override config for multipath daemon
-    #  template:
-    #    src: tempaltes/multipath.service.override.j2
-    #    dest: /etc/
+- name: Create systemd overrride directory for multipath
+  file:
+    name: /etc/systemd/system/multipath.service.d/
+    state: directory
+  when: dm_multipath_daemon_readonly_bindings
+
+- name: Create systemd override config for multipath daemon
+  template:
+    src: templates/multipath.service.override.j2
+    dest: /etc/systemd/system/multipath.service.d/readonly-bindings.conf
+    mode: "0755"
+  when: dm_multipath_daemon_readonly_bindings
