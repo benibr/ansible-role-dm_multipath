@@ -10,10 +10,10 @@ DOCUMENTATION = r'''
 module: sas_multipath_facts
 short_description: Return list of SAS disks sorted by controllers.
 description:
-     - Returns list of SAS disks sorted in two groups by controllers (primary, secondary).
-     - The module also returns a variable to be used as user_friendly_name in dm-multipath.
+     - Returns list of SAS disks sorted in groups by jbods.
+     - If given by the user the jbods get roles assigned (primary, secondary).
 version_added: "2.15"
-requirements: ["Device Mapper Multipath on Linux kernel with sysfs and exactly two SAS controllers"]
+requirements: ["Linux kernel with sysfs"]
 attributes:
     check_mode:
         support: full
@@ -23,46 +23,39 @@ attributes:
         support: full
     platform:
         platforms: linux
-notes:
-  - When accessing the RV(ansible_facts.dm_multipath_facts) facts collected by this module,
-    it is recommended to not use "dot notation" because services can have a C(-)
-    character in their name which would result in invalid "dot notation", such as
-    C(ansible_facts.services.zuul-gateway). It is instead recommended to
-    using the string value of the service name as the key in order to obtain
-    the fact data value like C(ansible_facts.services['zuul-gateway'])
 author:
   - Benedikt Braunger (@zsn342)
 '''
 
 EXAMPLES = r'''
 - name: Populate SAS multipath facts
-  ansible.builtin.sas_multipath_facts:
+  sas_multipath_facts:
+    # optinal roles
+    primary: "3500c0ff06711383c"
+    secondary: "3500c0ff06711d93c"
 
 - name: Print service facts
   ansible.builtin.debug:
     var: ansible_facts.sas_multipath_facts
 '''
 
-#RETURN = r'''
-#ansible_facts:
-#  description: Facts to add to ansible_facts about the services on the system
-#  returned: always
-#  type: complex
-#  contains:
-#    services:
-#      description: States of the services with service name as key.
-#      returned: always
-#      type: list
-#      elements: dict
-#      contains:
-#        source:
-#          description:
-#          - Init system of the service.
-#          - One of V(rcctl), V(systemd), V(sysv), V(upstart), V(src).
-#          returned: always
-#          type: str
-#          sample: sysv
-#'''
+RETURN = r'''
+ansible_facts:
+  description: Facts to add to ansible_facts about the sas devices on the system
+  returned: always
+  type: complex
+  contains:
+    sas_ctrls:
+      description: Dict of SAS controllers with ports and attached jbods
+      returned: always
+      type: dict
+      elements: dict
+    sas_jbods:
+      description: Dict of SAS JBODs and attached disks
+      returned: always
+      type: dict
+      elements: dict
+'''
 
 
 import os
@@ -76,15 +69,16 @@ class SAS_JBODS(object):
         self.module = module
         self.ctrls = {}
         self.jbods = {}
+        # the type of controllers this module was developed for
+        self.ctrl_class = "0x010700"
         self.ctrl_glob = glob.glob("/sys/devices/*/*/*/", recursive=True)
 
     def gather_controllers(self):
-        ctrl_class = "0x010700"
         for path in self.ctrl_glob:
             try:
                 with open(os.path.join(path, "class"), "r") as f:
                     device_class = f.readline().rstrip()
-                    if device_class == ctrl_class:
+                    if device_class == self.ctrl_class:
                         self.ctrls[path] = {}
                     f.close()
             except FileNotFoundError:
