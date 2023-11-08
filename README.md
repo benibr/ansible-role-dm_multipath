@@ -16,6 +16,8 @@ Install dm-multipath and configure with defaults and ensure it's started:
 
 Gather information about SAS controllers and JBODs 
 and let Ansible name the DM multipath devices depending on their jbods.
+This prevents the autodiscovery+naming of multipath devices and
+instead creates multipath devices named like: `/dev/mapper/primary-<WWID>`.
 
 ```
 ...
@@ -25,6 +27,7 @@ and let Ansible name the DM multipath devices depending on their jbods.
           primary: "3500c0ff06711383c"
           secondary: "3500c0ff06711d93c"
         dm_multipath_daemon_readonly_bindings: true
+        dm_multipath_defaults_find_multipaths: "no"
       roles:
          - dm_multipath
 ```
