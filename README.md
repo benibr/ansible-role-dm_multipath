@@ -2,10 +2,6 @@
 
 This roles installs and configures Linux `dm_multipath` driver to access 
 
-## Role Variables
-
-A description of the settable variables for this role should go here, including any variables that are in defaults/main.yml, vars/main.yml, and any variables that can/should be set via parameters to the role. Any variables that are read from other roles and/or the global scope (ie. hostvars, group vars, etc.) should be mentioned here as well.
-
 ## Example Playbook
 
 Install dm-multipath and configure with defaults and ensure it's started:
@@ -13,6 +9,22 @@ Install dm-multipath and configure with defaults and ensure it's started:
 ```
 ...
     - hosts: all
+      roles:
+         - dm_multipath
+```
+
+
+Gather information about SAS controllers and JBODs 
+and let Ansible name the DM multipath devices depending on their jbods.
+
+```
+...
+    - hosts: all
+      vars:
+        dm_multipath_sas_jbods:
+          primary: "3500c0ff06711383c"
+          secondary: "3500c0ff06711d93c"
+        dm_multipath_daemon_readonly_bindings: true
       roles:
          - dm_multipath
 ```
