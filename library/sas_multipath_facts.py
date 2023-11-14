@@ -104,8 +104,10 @@ class SAS_JBODS(object):
                 try:
                     with open(os.path.join(disk_path, "wwid"), "r") as f:
                         wwid = f.readline().rstrip().replace("naa.", "3")
+                        disk_type = self.disk_type(disk_path)
                         self.jbods[jbod].setdefault("disks", [])
                         self.jbods[jbod]["disks"].append({'wwid': wwid,
+                                                         'type': disk_type,
                                                          'path': disk_path
                                                           })
                         f.close()
@@ -123,6 +125,22 @@ class SAS_JBODS(object):
                 self.jbods[jbod]["role"] = "secondary"
             else:
                 self.jbods[jbod]["role"] = "unknown"
+
+    def disk_type(self, disk):
+        ret="unknown"
+        try:
+            rot_path = glob.glob(os.path.join(disk, "block/*/queue/rotational"))[0]
+            with open(rot_path, "r") as f:
+                rot = f.readline().strip()
+                if rot == "1":
+                    ret="hdd"
+                elif rot == "0":
+                    ret="ssd"
+        except (IndexError) as e:
+            # glob return empty list if we hit the WWID of a enclosure
+            # cause block/ doesn't exists for them
+            pass
+        return(ret)
 
 
 def main():
